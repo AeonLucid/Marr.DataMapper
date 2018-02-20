@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Marr.Data.UnitTests.Entities;
-using Marr.Data.UnitTests;
-using Marr.Data.TestHelper;
-using Rhino.Mocks;
 using Marr.Data.Mapping;
-using System.Reflection;
+using Marr.Data.TestHelper;
 
 namespace Marr.Data.UnitTests
 {

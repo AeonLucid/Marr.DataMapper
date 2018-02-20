@@ -1,55 +1,37 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marr.Data", "Marr.Data\Marr.Data.csproj", "{F6FC6BE7-0847-4817-A1ED-223DC647C3D7}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marr.Data", "Marr.Data\Marr.Data.csproj", "{71FB7482-5971-4B76-B2A9-2D7E02B7EF78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marr.Data.IntegrationTests", "Marr.Data.IntegrationTests\Marr.Data.IntegrationTests.csproj", "{F5248BE0-5ECC-4358-A284-FC3E97C5294F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marr.Data.UnitTests", "Marr.Data.UnitTests\Marr.Data.UnitTests.csproj", "{D87043BA-9653-486F-B9B1-81E3C38D88E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marr.Data.UnitTests", "Marr.Data.UnitTests\Marr.Data.UnitTests.csproj", "{164FE31B-D0E2-4BE9-8738-58127D7E0FB0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marr.Data.TestHelper", "Marr.Data.TestHelper\Marr.Data.TestHelper.csproj", "{DC6E5BDC-26E4-40EB-B4E7-BF755004B73A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{FAD734C8-5F75-4AD8-A523-51E3F94279D0}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\create_mdm_release_package.bat = .nuget\create_mdm_release_package.bat
-		.nuget\mdm_release.nuspec = .nuget\mdm_release.nuspec
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{9D2D8945-D86D-4211-A391-4A5D227DA19A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marr.Data.TestHelper", "Marr.Data.TestHelper\Marr.Data.TestHelper.csproj", "{1273F305-2E4B-4DF9-A5A1-33F2A78EF9C3}"
 EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = Marr.Data.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F6FC6BE7-0847-4817-A1ED-223DC647C3D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F6FC6BE7-0847-4817-A1ED-223DC647C3D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F6FC6BE7-0847-4817-A1ED-223DC647C3D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F6FC6BE7-0847-4817-A1ED-223DC647C3D7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F5248BE0-5ECC-4358-A284-FC3E97C5294F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F5248BE0-5ECC-4358-A284-FC3E97C5294F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F5248BE0-5ECC-4358-A284-FC3E97C5294F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F5248BE0-5ECC-4358-A284-FC3E97C5294F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{164FE31B-D0E2-4BE9-8738-58127D7E0FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{164FE31B-D0E2-4BE9-8738-58127D7E0FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{164FE31B-D0E2-4BE9-8738-58127D7E0FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{164FE31B-D0E2-4BE9-8738-58127D7E0FB0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DC6E5BDC-26E4-40EB-B4E7-BF755004B73A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC6E5BDC-26E4-40EB-B4E7-BF755004B73A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC6E5BDC-26E4-40EB-B4E7-BF755004B73A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC6E5BDC-26E4-40EB-B4E7-BF755004B73A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71FB7482-5971-4B76-B2A9-2D7E02B7EF78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71FB7482-5971-4B76-B2A9-2D7E02B7EF78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71FB7482-5971-4B76-B2A9-2D7E02B7EF78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71FB7482-5971-4B76-B2A9-2D7E02B7EF78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D87043BA-9653-486F-B9B1-81E3C38D88E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D87043BA-9653-486F-B9B1-81E3C38D88E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D87043BA-9653-486F-B9B1-81E3C38D88E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D87043BA-9653-486F-B9B1-81E3C38D88E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1273F305-2E4B-4DF9-A5A1-33F2A78EF9C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1273F305-2E4B-4DF9-A5A1-33F2A78EF9C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1273F305-2E4B-4DF9-A5A1-33F2A78EF9C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1273F305-2E4B-4DF9-A5A1-33F2A78EF9C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{9D2D8945-D86D-4211-A391-4A5D227DA19A} = {FAD734C8-5F75-4AD8-A523-51E3F94279D0}
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D86100D1-8336-4549-975C-3B269BB0504F}
 	EndGlobalSection
 EndGlobal

@@ -67,7 +67,7 @@ namespace Marr.Data
     /// </summary>
     /// <typeparam name="TParent">The parent entity that contains the lazy loaded entity.</typeparam>
     /// <typeparam name="TChild">The child entity that is being lazy loaded.</typeparam>
-    internal class LazyLoaded<TParent, TChild> : LazyLoaded<TChild>
+    public class LazyLoaded<TParent, TChild> : LazyLoaded<TChild>
     {
 		private Func<IDataMapper> _dbMapperFactory;
         private TParent _parent;

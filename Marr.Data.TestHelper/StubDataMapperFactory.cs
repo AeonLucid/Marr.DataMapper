@@ -13,12 +13,10 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library. If not, see <http://www.gnu.org/licenses/>. */
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Rhino.Mocks;
 using System.Data.Common;
+using System.Data.SqlClient;
+using Moq;
 
 namespace Marr.Data.TestHelper
 {
@@ -39,30 +37,28 @@ namespace Marr.Data.TestHelper
 			//var parameters = MockRepository.GenerateMock<DbParameterCollection>();
 			//var command = MockRepository.GenerateMock<DbCommand>();
 			//var connection = MockRepository.GenerateMock<DbConnection>();
-			var dbFactory = MockRepository.GenerateMock<DbProviderFactory>();
+		    var dbFactory = new Mock<DbProviderFactory>();
 
 			foreach (var reader in readers)
 			{
-				var parameters = MockRepository.GenerateMock<DbParameterCollection>();
-				parameters.Expect(p => p.Add(null)).Return(1).IgnoreArguments();
+				var parameters = new Mock<DbParameterCollection>();
+			    parameters.Setup(p => p.Add(null)).Returns(1);
 
-				var command = MockRepository.GenerateMock<DbCommand>();
-				command.Expect(c => c.ExecuteReader()).Return(reader);
+				var command = new Mock<DbCommand>();
+			    command.Setup(c => c.ExecuteReader()).Returns(reader);
+			    command.Setup(c => c.Parameters).Returns(parameters.Object);
+			    command.Setup(c => c.CreateParameter()).Returns(new SqlParameter());
 
-				command.Expect(c => c.Parameters).Return(parameters);
-				command.Expect(c => c.CreateParameter()).Return(new System.Data.SqlClient.SqlParameter()).Repeat.Any();
-				command.Stub(c => c.CommandText);
+				var connection = new Mock<DbConnection>();
+			    connection.Setup(c => c.CreateCommand()).Returns(command.Object);
 
-				var connection = MockRepository.GenerateMock<DbConnection>();
-				connection.Expect(c => c.CreateCommand()).Return(command);
-
-				command.Expect(c => c.Connection).Return(connection);
+			    command.Setup(c => c.Connection).Returns(connection.Object);
 
 				//var dbFactory = MockRepository.GenerateMock<DbProviderFactory>();
-				dbFactory.Expect(f => f.CreateConnection()).Return(connection).Repeat.Once();
+			    dbFactory.Setup(f => f.CreateConnection()).Returns(connection.Object);
 			}
 
-			return new StubDataMapper(dbFactory);
+			return new StubDataMapper(dbFactory.Object);
 		}
 
 		/// <summary>
@@ -71,26 +67,24 @@ namespace Marr.Data.TestHelper
 		/// <returns>Returns a StubDataMapper.</returns>
 		public static IDataMapper CreateForUpdate()
 		{
-			var parameters = MockRepository.GenerateMock<DbParameterCollection>();
+		    var parameters = new Mock<DbParameterCollection>();
 
-			var command = MockRepository.GenerateMock<DbCommand>();
-			command.Expect(c => c.Parameters).Return(parameters);
-			command.Stub(c => c.CommandText);
-			command.Expect(c => c.ExecuteNonQuery()).Return(1);
+		    var command = new Mock<DbCommand>();
+		    command.Setup(c => c.Parameters).Returns(parameters.Object);
+			command.Setup(c => c.ExecuteNonQuery()).Returns(1);
 			command
-				.Expect(c => c.CreateParameter())
-				.Repeat.Any()
-				.Return(MockRepository.GenerateStub<DbParameter>());
+				.Setup(c => c.CreateParameter())
+				.Returns(new Mock<DbParameter>().Object);
 
-			var connection = MockRepository.GenerateMock<DbConnection>();
-			connection.Expect(c => c.CreateCommand()).Return(command);
+			var connection = new Mock<DbConnection>();
+			connection.Setup(c => c.CreateCommand()).Returns(command.Object);
 
-			command.Expect(c => c.Connection).Return(connection);
+			command.Setup(c => c.Connection).Returns(connection.Object);
 
-			DbProviderFactory dbFactory = MockRepository.GenerateMock<DbProviderFactory>();
-			dbFactory.Expect(f => f.CreateConnection()).Return(connection);
+			var dbFactory = new Mock<DbProviderFactory>();
+			dbFactory.Setup(f => f.CreateConnection()).Returns(connection.Object);
 
-			return new StubDataMapper(dbFactory);
+			return new StubDataMapper(dbFactory.Object);
 		}
 
 		/// <summary>
@@ -99,25 +93,23 @@ namespace Marr.Data.TestHelper
 		/// <returns>Returns a StubDataMapper.</returns>
 		public static IDataMapper CreateForInsert()
 		{
-			var parameters = MockRepository.GenerateMock<DbParameterCollection>();
+		    var parameters = new Mock<DbParameterCollection>();
 
-			var command = MockRepository.GenerateMock<DbCommand>();
-			command.Expect(c => c.Parameters).Return(parameters);
-			command.Stub(c => c.CommandText);
-			command
-				.Expect(c => c.CreateParameter())
-				.Repeat.Any()
-				.Return(MockRepository.GenerateStub<DbParameter>());
+		    var command = new Mock<DbCommand>();
+		    command.Setup(c => c.Parameters).Returns(parameters.Object);
+		    command
+		        .Setup(c => c.CreateParameter())
+		        .Returns(new Mock<DbParameter>().Object);
 
-			var connection = MockRepository.GenerateMock<DbConnection>();
-			connection.Expect(c => c.CreateCommand()).Return(command);
+		    var connection = new Mock<DbConnection>();
+		    connection.Setup(c => c.CreateCommand()).Returns(command.Object);
 
-			command.Expect(c => c.Connection).Return(connection);
+		    command.Setup(c => c.Connection).Returns(connection.Object);
 
-			DbProviderFactory dbFactory = MockRepository.GenerateMock<DbProviderFactory>();
-			dbFactory.Expect(f => f.CreateConnection()).Return(connection);
+		    var dbFactory = new Mock<DbProviderFactory>();
+		    dbFactory.Setup(f => f.CreateConnection()).Returns(connection.Object);
 
-			return new StubDataMapper(dbFactory);
-		}
+		    return new StubDataMapper(dbFactory.Object);
+        }
 	}
 }

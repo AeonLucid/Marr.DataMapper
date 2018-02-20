@@ -18,12 +18,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
-using System.Reflection;
-using System.Collections;
 using System.Linq;
 using Marr.Data.Mapping;
-using Marr.Data.Converters;
 using Marr.Data.Parameters;
 using Marr.Data.QGen;
 using System.Linq.Expressions;
@@ -43,14 +39,14 @@ namespace Marr.Data
 		private string _connectionString;
 		private DbCommand _command;
 
-		/// <summary>
-		/// Initializes a DataMapper for the given provider type and connection string.
-		/// </summary>
-		/// <param name="providerName">Ex: </param>
-		/// <param name="connectionString">The database connection string.</param>
-		public DataMapper(string providerName, string connectionString)
-			: this(DbProviderFactories.GetFactory(providerName), connectionString)
-		{ }
+//		/// <summary>
+//		/// Initializes a DataMapper for the given provider type and connection string.
+//		/// </summary>
+//		/// <param name="providerName">Ex: </param>
+//		/// <param name="connectionString">The database connection string.</param>
+//		public DataMapper(string providerName, string connectionString)
+//			: this(DbProviderFactory.GetFactory(providerName), connectionString)
+//		{ }
 
 		/// <summary>
 		/// A database provider agnostic initialization.

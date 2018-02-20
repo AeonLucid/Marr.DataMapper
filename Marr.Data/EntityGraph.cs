@@ -16,7 +16,6 @@ License along with this library. If not, see <http://www.gnu.org/licenses/>. */
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
