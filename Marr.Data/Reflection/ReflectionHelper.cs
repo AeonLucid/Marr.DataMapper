@@ -16,7 +16,7 @@ License along with this library. If not, see <http://www.gnu.org/licenses/>. */
 using System;
 using System.Reflection;
 
-namespace Marr.Data
+namespace Marr.Data.Reflection
 {
     public class ReflectionHelper
     {
@@ -32,14 +32,11 @@ namespace Marr.Data
             {
                 return null;
             }
-            else if (fieldType.IsValueType)
+            if (fieldType.IsValueType)
             {
                 return Activator.CreateInstance(fieldType);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         /// <summary>
@@ -59,14 +56,9 @@ namespace Marr.Data
                 memberType = typeof(object);
 
             // Handle nullable types - get underlying type
-            if (memberType.IsGenericType)
+            if (memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-				Type genericTypeDefinition = memberType.GetGenericTypeDefinition();
-				if (genericTypeDefinition == typeof(Nullable<>) ||
-					genericTypeDefinition == typeof(LazyLoaded<>))
-				{
-					memberType = memberType.GetGenericArguments()[0];
-				}
+                memberType = memberType.GetGenericArguments()[0];
             }
 
             return memberType;

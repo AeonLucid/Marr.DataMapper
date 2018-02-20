@@ -56,50 +56,15 @@ namespace Marr.Data.Mapping
 
             Getter = MapRepository.Instance.ReflectionStrategy.BuildGetter(member.DeclaringType, FieldName);
             Setter = MapRepository.Instance.ReflectionStrategy.BuildSetter(member.DeclaringType, FieldName);
-
-            if (member.MemberType == MemberTypes.Property)
-            {
-                PropertyInfo pi = (PropertyInfo)member;
-                CanRead = pi.CanRead;
-                CanWrite = pi.CanWrite;
-            }
-            else if (member.MemberType == MemberTypes.Field)
-            {
-                CanRead = true;
-                CanWrite = true;
-            }
         }
 
         public string FieldName { get; set; }
         public Type FieldType { get; set; }
         public Enum DBType { get; set; }
         public IColumnInfo ColumnInfo { get; set; }
-        
+
+        public GetterDelegate Getter { get; private set; }
+        public SetterDelegate Setter { get; private set; }
         public IConverter Converter { get; private set; }
-        public bool CanRead { get; private set; }
-        public bool CanWrite { get; private set; }
-
-        internal GetterDelegate Getter { get; private set; }
-        internal SetterDelegate Setter { get; private set; }
-
-        /// <summary>
-        /// Gets or sets a function that converts a column value after it is read from the 
-        /// datareader and before it is set to the domain object.
-        /// NOTE: This property can only be set via the FluentMappings class.
-        /// </summary>
-        /// <remarks>
-        /// DB -> [FromDB conversion function] -> Domain Object
-        /// </remarks>
-        public Func<object, object> FromDB { get; set; }
-
-        /// <summary>
-        /// Gets or sets a function that converts a column value after it is read from the 
-        /// domain object and before it is sent to the database.
-        /// NOTE: This property can only be set via the FluentMappings class.
-        /// </summary>
-        /// <remarks>
-        /// Domain Object -> [ToDB conversion function] -> DB
-        /// </remarks>
-        public Func<object, object> ToDB { get; set; }
     }
 }

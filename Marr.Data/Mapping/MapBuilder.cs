@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace Marr.Data.Mapping
 {
+    [Obsolete("This class is obsolete.  Please use the 'Mappings' class.")]
     public class MapBuilder
     {
         private bool _publicOnly;
@@ -23,30 +24,28 @@ namespace Marr.Data.Mapping
 
         /// <summary>
         /// Creates column mappings for the given type.
-		/// Maps all properties except ICollection properties.
+        /// Maps all properties except ICollection properties.
         /// </summary>
         /// <typeparam name="T">The type that is being built.</typeparam>
         /// <returns><see cref="ColumnMapCollection"/></returns>
         public ColumnMapBuilder<T> BuildColumns<T>()
         {
             return BuildColumns<T>(m => m.MemberType == MemberTypes.Property &&
-				(m as PropertyInfo).CanWrite &&
                 !typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType));
         }
 
         /// <summary>
         /// Creates column mappings for the given type.
         /// Maps all properties that are simple types (int, string, DateTime, etc).  
-		/// ICollection properties are not included.
+        /// ICollection properties are not included.
         /// </summary>
         /// <typeparam name="T">The type that is being built.</typeparam>
         /// <returns><see cref="ColumnMapCollection"/></returns>
         public ColumnMapBuilder<T> BuildColumnsFromSimpleTypes<T>()
         {
             return BuildColumns<T>(m => m.MemberType == MemberTypes.Property &&
-				(m as PropertyInfo).CanWrite &&
                 DataHelper.IsSimpleType((m as PropertyInfo).PropertyType) &&
-				!typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType));
+                !typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType));
         }
 
         /// <summary>
@@ -60,7 +59,6 @@ namespace Marr.Data.Mapping
         {
             return BuildColumns<T>(m =>
                 m.MemberType == MemberTypes.Property &&
-				(m as PropertyInfo).CanWrite &&
                 propertiesToInclude.Contains(m.Name));
         }
 
@@ -75,7 +73,6 @@ namespace Marr.Data.Mapping
         {
             return BuildColumns<T>(m => 
                 m.MemberType == MemberTypes.Property &&
-				(m as PropertyInfo).CanWrite &&
                 !propertiesToExclude.Contains(m.Name));
         }
 
@@ -115,16 +112,15 @@ namespace Marr.Data.Mapping
 
         /// <summary>
         /// Creates relationship mappings for the given type.
-		/// Maps all properties that implement ICollection.
+        /// Maps all properties that implement ICollection.
         /// </summary>
         /// <typeparam name="T">The type that is being built.</typeparam>
         /// <returns><see cref="RelationshipBuilder"/></returns>
         public RelationshipBuilder<T> BuildRelationships<T>()
         {
             return BuildRelationships<T>(m => 
-                m.MemberType == MemberTypes.Property &&
-				(m as PropertyInfo).CanWrite &&
-				typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType));
+                m.MemberType == MemberTypes.Property && 
+                typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType));
         }
 
         /// <summary>
@@ -138,13 +134,13 @@ namespace Marr.Data.Mapping
         {
             Func<MemberInfo, bool> predicate = m => 
                 (
-					// ICollection properties
-                    m.MemberType == MemberTypes.Property &&
-					typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType) &&
+                    // ICollection properties
+                    m.MemberType == MemberTypes.Property && 
+                    typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType) &&
                     propertiesToInclude.Contains(m.Name)
                 ) || ( // Single entity properties
                     m.MemberType == MemberTypes.Property &&
-					!typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType) &&
+                    !typeof(ICollection).IsAssignableFrom((m as PropertyInfo).PropertyType) &&
                     propertiesToInclude.Contains(m.Name)
                 );
             
@@ -164,7 +160,7 @@ namespace Marr.Data.Mapping
             strategy.RelationshipPredicate = predicate;
             RelationshipCollection relationships = strategy.MapRelationships(entityType);
             MapRepository.Instance.Relationships[entityType] = relationships;
-			return new RelationshipBuilder<T>(null, entityType, relationships);
+            return new RelationshipBuilder<T>(null, relationships);
         }
 
         /// <summary>
@@ -178,7 +174,7 @@ namespace Marr.Data.Mapping
             Type entityType = typeof(T);
             RelationshipCollection relationships = new RelationshipCollection();
             MapRepository.Instance.Relationships[entityType] = relationships;
-            return new RelationshipBuilder<T>(null, entityType, relationships);
+            return new RelationshipBuilder<T>(null, relationships);
         }
         
         #endregion
@@ -192,7 +188,7 @@ namespace Marr.Data.Mapping
         /// <returns></returns>
         public TableBuilder<T> BuildTable<T>()
         {
-            return new TableBuilder<T>(null, typeof(T));
+            return new TableBuilder<T>(null);
         }
 
         /// <summary>
@@ -202,7 +198,7 @@ namespace Marr.Data.Mapping
         /// <param name="tableName"></param>
         public TableBuilder<T> BuildTable<T>(string tableName)
         {
-			return new TableBuilder<T>(null, typeof(T)).SetTableName(tableName);
+            return new TableBuilder<T>(null).SetTableName(tableName);
         }
 
         #endregion

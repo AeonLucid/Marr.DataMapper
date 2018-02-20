@@ -50,13 +50,13 @@ namespace Marr.Data
             TypeConverters = new Dictionary<Type, IConverter>();
 
             // Register a default IReflectionStrategy
-            ReflectionStrategy = new CachedDelegateReflectionStrategy();
+            ReflectionStrategy = new SimpleReflectionStrategy();
 
             // Register a default type converter for Enums
-            TypeConverters.Add(typeof(Enum), new Converters.EnumStringConverter());
+            TypeConverters.Add(typeof(Enum), new EnumStringConverter());
 
             // Register a default IDbTypeBuilder
-            _dbTypeBuilder = new Parameters.DbTypeBuilder();
+            _dbTypeBuilder = new DbTypeBuilder();
 
             _columnMapStrategies = new Dictionary<Type, IMapStrategy>();
             RegisterDefaultMapStrategy(new AttributeMapStrategy());
@@ -105,18 +105,15 @@ namespace Marr.Data
                 // Return entity specific column map strategy
                 return _columnMapStrategies[entityType];
             }
-            else
-            {
-                // Return the default column map strategy
-                return _columnMapStrategies[typeof(object)];
-            }
+            // Return the default column map strategy
+            return _columnMapStrategies[typeof(object)];
         }
 
         #endregion
 
         #region - Table repository -
 
-        public string GetTableName(Type entityType)
+        internal string GetTableName(Type entityType)
         {
             if (!Tables.ContainsKey(entityType))
             {
@@ -219,21 +216,18 @@ namespace Marr.Data
                 // User registered type converter
                 return TypeConverters[dataType];
             }
-            else if (TypeConverters.ContainsKey(typeof(Enum)) && dataType.IsEnum)
+            if (TypeConverters.ContainsKey(typeof(Enum)) && dataType.IsEnum)
             {
                 // A converter is registered to handled enums
                 return TypeConverters[typeof(Enum)];
             }
-            else if (TypeConverters.ContainsKey(typeof(object)))
+            if (TypeConverters.ContainsKey(typeof(object)))
             {
                 // User registered default converter
                 return TypeConverters[typeof(object)];
             }
-            else
-            {
-                // No conversion
-                return null;
-            }
+            // No conversion
+            return null;
         }
 
         #endregion

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq.Expressions;
@@ -12,7 +13,7 @@ namespace Marr.Data.QGen
     /// It also has some methods that coincide with Linq methods, to provide Linq compatibility.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-	public class SortBuilder<T> : IEnumerable<T>, ISortQueryBuilder, IQueryToList
+    public class SortBuilder<T> : IEnumerable<T>, ISortQueryBuilder
     {
         private string _constantOrderByClause;
         private QueryBuilder<T> _baseBuilder;
@@ -43,28 +44,28 @@ namespace Marr.Data.QGen
 
         public virtual SortBuilder<T> OrWhere(Expression<Func<T, bool>> filterExpression)
         {
-            var orWhere = new WhereBuilder<T>(_db.Command, _dialect, filterExpression, _tables, _useAltName, true);
+            var orWhere = new WhereBuilder<T>(_db.Command, _dialect, filterExpression, _tables, false, true);
             _whereBuilder.Append(orWhere, WhereAppendType.OR);
             return this;
         }
 
         public virtual SortBuilder<T> OrWhere(string whereClause)
         {
-            var orWhere = new WhereBuilder<T>(whereClause, _useAltName);
+            var orWhere = new WhereBuilder<T>(whereClause, false);
             _whereBuilder.Append(orWhere, WhereAppendType.OR);
             return this;
         }
 
         public virtual SortBuilder<T> AndWhere(Expression<Func<T, bool>> filterExpression)
         {
-            var andWhere = new WhereBuilder<T>(_db.Command, _dialect, filterExpression, _tables, _useAltName, true);
+            var andWhere = new WhereBuilder<T>(_db.Command, _dialect, filterExpression, _tables, false, true);
             _whereBuilder.Append(andWhere, WhereAppendType.AND);
             return this;
         }
 
         public virtual SortBuilder<T> AndWhere(string whereClause)
         {
-            var andWhere = new WhereBuilder<T>(whereClause, _useAltName);
+            var andWhere = new WhereBuilder<T>(whereClause, false);
             _whereBuilder.Append(andWhere, WhereAppendType.AND);
             return this;
         }
@@ -98,13 +99,6 @@ namespace Marr.Data.QGen
             _constantOrderByClause = orderByClause;
             return this;
         }
-
-		// Used by QuerableEntityContext / IQueryable
-		internal SortBuilder<T> AddSortExpression(Expression exp, SortDirection dir)
-		{
-			_sortExpressions.Add(new SortColumn<T>(exp, dir));
-			return this;
-		}
 
         public virtual SortBuilder<T> OrderBy(Expression<Func<T, object>> sortExpression)
         {
@@ -250,7 +244,7 @@ namespace Marr.Data.QGen
 
         public virtual IEnumerator<T> GetEnumerator()
         {
-            var list = this.ToList();
+            var list = ToList();
             return list.GetEnumerator();
         }
 
@@ -258,16 +252,11 @@ namespace Marr.Data.QGen
 
         #region IEnumerable Members
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-			return this.GetEnumerator();
+            throw new NotImplementedException();
         }
 
         #endregion
-		
-		object IQueryToList.ToListObject()
-		{
-			return (_baseBuilder as IQueryToList).ToListObject();
-		}
-	}
+    }
 }

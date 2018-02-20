@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Runtime.Serialization;
 
 namespace Marr.Data
 {
@@ -53,12 +55,12 @@ namespace Marr.Data
             }
         }
 
-        public void BeginTransaction()
+        public void BeginTransaction(IsolationLevel isolationLevel)
         {
             // Only allow one transaction to begin
             if (_transactionCount < 1)
             {
-                DB.BeginTransaction();
+                DB.BeginTransaction(isolationLevel);
             }
 
             _transactionCount++;
@@ -118,8 +120,8 @@ namespace Marr.Data
         public NestedSharedContextRollBackException(string message) : base(message) { }
         public NestedSharedContextRollBackException(string message, Exception inner) : base(message, inner) { }
         protected NestedSharedContextRollBackException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+          SerializationInfo info,
+          StreamingContext context)
             : base(info, context) { }
     }
 }

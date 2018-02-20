@@ -1,13 +1,11 @@
 ﻿using System;
-using Marr.Data.Mapping;
-using Marr.Data.QGen;
 
 namespace Marr.Data
 {
     public interface ILazyLoaded : ICloneable
     {
         bool IsLoaded { get; }
-		void Prepare(Func<IDataMapper> dataMapperFactory, object parent, string entityTypePath);
+        void Prepare(Func<IDataMapper> dataMapperFactory, object parent);
         void LazyLoad();
     }
 
@@ -40,7 +38,7 @@ namespace Marr.Data
 
         public bool IsLoaded { get; protected set; }
 
-		public virtual void Prepare(Func<IDataMapper> dataMapperFactory, object parent, string entityTypePath)
+        public virtual void Prepare(Func<IDataMapper> dataMapperFactory, object parent)
         { }
 
         public virtual void LazyLoad()
@@ -67,20 +65,17 @@ namespace Marr.Data
     /// </summary>
     /// <typeparam name="TParent">The parent entity that contains the lazy loaded entity.</typeparam>
     /// <typeparam name="TChild">The child entity that is being lazy loaded.</typeparam>
-    public class LazyLoaded<TParent, TChild> : LazyLoaded<TChild>
+    internal class LazyLoaded<TParent, TChild> : LazyLoaded<TChild>
     {
-		private Func<IDataMapper> _dbMapperFactory;
         private TParent _parent;
-		private string _entityTypePath;
+        private Func<IDataMapper> _dbMapperFactory;
 
-		private readonly Func<IDataMapper, TParent, object> _query;
-		private RelationshipTypes _relationshipType;
+        private readonly Func<IDataMapper, TParent, TChild> _query;
         private readonly Func<TParent, bool> _condition;
 
-		public LazyLoaded(Func<IDataMapper, TParent, object> query, RelationshipTypes relationshipType, Func<TParent, bool> condition = null)
+        internal LazyLoaded(Func<IDataMapper, TParent, TChild> query, Func<TParent, bool> condition = null)
         {
             _query = query;
-			_relationshipType = relationshipType;
             _condition = condition;
         }
 
@@ -96,62 +91,26 @@ namespace Marr.Data
         /// </summary>
         /// <param name="dataMapperFactory">Knows how to instantiate a new IDataMapper.</param>
         /// <param name="parent">The parent entity.</param>
-		/// <param name="member">The name of the member that is being lazy loaded.</param>
-		public override void Prepare(Func<IDataMapper> dataMapperFactory, object parent, string entityTypePath)
+        public override void Prepare(Func<IDataMapper> dataMapperFactory, object parent)
         {
             _dbMapperFactory = dataMapperFactory;
             _parent = (TParent)parent;
-			_entityTypePath = entityTypePath;
         }
 
         public override void LazyLoad()
         {
             if (!IsLoaded)
             {
-                if (_condition != null && !_condition(_parent))
-                {
-                    _value = default(TChild);
-                }
-                else
+                if (_condition != null && _condition(_parent))
                 {
                     using (IDataMapper db = _dbMapperFactory())
                     {
-						try
-						{
-							object result = _query(db, _parent);
-
-							IQueryToList query = result as IQueryToList;
-							if (query != null)
-							{
-								// User did not call ToList or FirstOrDefault
-								var enumerable = result as System.Collections.IEnumerable;
-								if (_relationshipType == RelationshipTypes.Many)
-								{
-									_value = (TChild)query.ToListObject();
-								}
-								else
-								{
-									var enumeratorOne = enumerable.GetEnumerator();
-									_value = (TChild)(enumeratorOne.MoveNext() ? enumeratorOne.Current : null);
-								}
-							}
-							else
-							{
-								// User already called ToList or FirstOrDefault
-								_value = (TChild)result;
-							}
-						}
-						catch (Exception ex)
-						{
-							var rtlEx = ex as RelationshipLoadException;
-							if (rtlEx != null)
-								throw;
-
-							throw new RelationshipLoadException(
-								string.Format("Lazy load failed for {0}.", _entityTypePath),
-								ex);
-						}
+                        _value = _query(db, _parent);
                     }
+                }
+                else
+                {
+                    _value = default(TChild);
                 }
 
                 IsLoaded = true;

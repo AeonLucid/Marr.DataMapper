@@ -21,6 +21,7 @@ namespace Marr.Data.QGen
         private MapRepository _repos;
         private DbCommand _command;
         private string _paramPrefix;
+        private bool _isLeftSide = true;
         protected bool _useAltName;
         protected Dialect _dialect;
         protected StringBuilder _sb;
@@ -63,10 +64,12 @@ namespace Marr.Data.QGen
         {
             _sb.Append("(");
 
+            _isLeftSide = true;
             Visit(expression.Left);
 
             _sb.AppendFormat(" {0} ", Decode(expression));
 
+            _isLeftSide = false;
             Visit(expression.Right);
 
             _sb.Append(")");
@@ -76,7 +79,7 @@ namespace Marr.Data.QGen
 
         protected override Expression VisitMethodCall(MethodCallExpression expression)
         {
-            string method = (expression as System.Linq.Expressions.MethodCallExpression).Method.Name;
+            string method = (expression as MethodCallExpression).Method.Name;
             switch (method)
             {
                 case "Contains":
@@ -90,10 +93,14 @@ namespace Marr.Data.QGen
                 case "EndsWith":
                     Write_EndsWith(expression);
                     break;
+                    
+                case "In":
+                    Write_In(expression);
+                    break;
 
                 default:
-					string msg = string.Format("'{0}' expressions are not currently supported in the {1} clause expression tree parser.", method, PrefixText);
-                    throw new NotSupportedException(msg);
+                    string msg = string.Format("'{0}' expressions are not yet implemented in the where clause expression tree parser.", method);
+                    throw new NotImplementedException(msg);
             }
 
             return expression;
@@ -101,7 +108,7 @@ namespace Marr.Data.QGen
 
         protected override Expression VisitMemberAccess(MemberExpression expression)
         {
-			if (expression.Expression is ParameterExpression)
+            if (_isLeftSide)
             {
                 string fqColumn = GetFullyQualifiedColumnName(expression.Member, expression.Expression.Type);
                 _sb.Append(fqColumn);
@@ -138,52 +145,51 @@ namespace Marr.Data.QGen
             return expression;
         }
 
-		private object GetRightValue(Expression expression)
-		{
-			object rightValue = null;
+        private object GetRightValue(Expression expression)
+        {
+            object rightValue = null;
 			
-			var simpleConstExp = expression as ConstantExpression;
-			if (simpleConstExp == null) // Value is not directly passed in as a constant
-			{
-				MemberExpression memberExp = expression as MemberExpression;
-				ConstantExpression constExp = null;
+            var simpleConstExp = expression as ConstantExpression;
+            if (simpleConstExp == null) // Value is not directly passed in as a constant
+            {
+                MemberExpression memberExp = expression as MemberExpression;
+                ConstantExpression constExp = null;
 
-				// Value may be nested in multiple levels of objects/properties, so traverse the MemberExpressions 
-				// until a ConstantExpression property value is found, and then unwind the stack to get the value.
-				var memberNames = new Stack<string>();
+                // Value may be nested in multiple levels of objects/properties, so traverse the MemberExpressions 
+                // until a ConstantExpression property value is found, and then unwind the stack to get the value.
+                var memberNames = new Stack<string>();
 
-				while (memberExp != null)
-				{
-					memberNames.Push(memberExp.Member.Name);
+                while (memberExp != null)
+                {
+                    memberNames.Push(memberExp.Member.Name);
 
-					// Function calls are not supported - user needs to simplify their Where expression.
-					var methodExp = memberExp.Expression as MethodCallExpression;
-					if (methodExp != null)
-					{
-						var errMsg = string.Format("Function calls are not supported by the Where clause expression parser.  Please evaluate your function call, '{0}', manually and then use the resulting paremeter value in your Where expression.",  methodExp.Method.Name);
-						throw new NotSupportedException(errMsg);
-					}
+                    // Function calls are not supported - user needs to simplify their Where expression.
+                    var methodExp = memberExp.Expression as MethodCallExpression;
+                    if (methodExp != null)
+                    {
+                        var errMsg = string.Format("Function calls are not supported by the Where clause expression parser.  Please evaluate your function call, '{0}', manually and then use the resulting paremeter value in your Where expression.",  methodExp.Method.Name);
+                        throw new NotSupportedException(errMsg);
+                    }
 
-					constExp = memberExp.Expression as ConstantExpression;
-					memberExp = memberExp.Expression as MemberExpression;
-				}
+                    constExp = memberExp.Expression as ConstantExpression;
+                    memberExp = memberExp.Expression as MemberExpression;
+                }
 
-				object entity = constExp.Value;
-				while (memberNames.Count > 0)
-				{
-					string entityName = memberNames.Pop();
-					entity = _repos.ReflectionStrategy.GetFieldValue(entity, entityName);
-				}
-				rightValue = entity;
-			}
-			else // Value is passed in directly as a constant
-			{
-				rightValue = simpleConstExp.Value;
-			}
+                object entity = constExp.Value;
+                while (memberNames.Count > 0)
+                {
+                    string entityName = memberNames.Pop();
+                    entity = _repos.ReflectionStrategy.GetFieldValue(entity, entityName);
+                }
+                rightValue = entity;
+            }
+            else // Value is passed in directly as a constant
+            {
+                rightValue = simpleConstExp.Value;
+            }
 
-			return rightValue;
-		}
-
+            return rightValue;
+        }
 
         protected string GetFullyQualifiedColumnName(MemberInfo member, Type declaringType)
         {
@@ -193,10 +199,9 @@ namespace Marr.Data.QGen
 
                 if (table == null)
                 {
-                    string msg = string.Format("The property '{0} -> {1}' you are trying to reference in the '{2}' statement belongs to an entity that has not been included in your query.  To reference this property, you must join the '{0}' entity using the Join or Graph method.",
+                    string msg = string.Format("The property '{0} -> {1}' you are trying to reference in the 'WHERE' statement belongs to an entity that has not been joined in your query.  To reference this property, you must join the '{0}' entity using the Join method.",
                         declaringType,
-                        member.Name,
-						PrefixText);
+                        member.Name);
 
                     throw new DataMappingException(msg);
                 }
@@ -254,6 +259,17 @@ namespace Marr.Data.QGen
             _sb.AppendFormat(_dialect.ContainsFormat, fqColumn, paramName);
         }
 
+        private void Write_In(MethodCallExpression body)
+        {
+            object value = GetRightValue(body.Arguments[1]);
+            //string paramName = string.Concat(_paramPrefix, "P", _command.Parameters.Count.ToString());
+            //var parameter = new ParameterChainMethods(_command, paramName, value).Parameter;
+
+            MemberExpression memberExp = (body.Arguments[0] as MemberExpression);
+            string fqColumn = GetFullyQualifiedColumnName(memberExp.Member, memberExp.Expression.Type);
+            _sb.AppendFormat(_dialect.InFormat, fqColumn, string.Join(",", value as List<int>));
+        }
+
         private void Write_StartsWith(MethodCallExpression body)
         {
             // Add parameter to Command.Parameters
@@ -286,7 +302,7 @@ namespace Marr.Data.QGen
         internal void Append(WhereBuilder<T> where, WhereAppendType appendType)
         {
             _constantWhereClause = string.Format("{0} {1} {2}",
-                this.ToString(),
+                ToString(),
                 appendType.ToString(),
                 where.ToString().Replace("WHERE ", string.Empty));
         }
@@ -297,10 +313,7 @@ namespace Marr.Data.QGen
             {
                 return _sb.ToString();
             }
-            else
-            {
-                return _constantWhereClause;
-            }
+            return _constantWhereClause;
         }
     } 
 

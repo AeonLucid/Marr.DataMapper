@@ -14,10 +14,12 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library. If not, see <http://www.gnu.org/licenses/>. */
 
 using System;
+using System.Globalization;
+using Marr.Data.Mapping;
 
 namespace Marr.Data.Converters
 {
-    public class CastConverter<TClr, TDb> : Marr.Data.Converters.IConverter
+    public class CastConverter<TClr, TDb> : IConverter
         where TClr : IConvertible
         where TDb : IConvertible
     {
@@ -28,16 +30,21 @@ namespace Marr.Data.Converters
             get { return typeof(TDb); }
         }
 
-        public object FromDB(Marr.Data.Mapping.ColumnMap map, object dbValue)
+        public object FromDB(ConverterContext context)
         {
-            TDb val = (TDb)dbValue;
-            return val.ToType(typeof(TClr), System.Globalization.CultureInfo.InvariantCulture);
+            TDb val = (TDb)context.DbValue;
+            return val.ToType(typeof(TClr), CultureInfo.InvariantCulture);
+        }
+
+        public object FromDB(ColumnMap map, object dbValue)
+        {
+            return FromDB(new ConverterContext { ColumnMap = map, DbValue = dbValue });
         }
 
         public object ToDB(object clrValue)
         {
             TClr val = (TClr)clrValue;
-            return val.ToType(typeof(TDb), System.Globalization.CultureInfo.InvariantCulture);
+            return val.ToType(typeof(TDb), CultureInfo.InvariantCulture);
         }
 
         #endregion

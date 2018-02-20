@@ -20,20 +20,23 @@ namespace Marr.Data.Converters
 {
     public class EnumIntConverter : IConverter
     {
+        public object FromDB(ConverterContext context)
+        {
+            if (context.DbValue == null || context.DbValue == DBNull.Value)
+                return null;
+            return Enum.ToObject(context.ColumnMap.FieldType, (int)context.DbValue);
+        }
+
         public object FromDB(ColumnMap map, object dbValue)
         {
-            if (dbValue == null || dbValue == DBNull.Value)
-                return null;
-            else
-                return Enum.ToObject(map.FieldType, (int)dbValue);
+            return FromDB(new ConverterContext { ColumnMap = map, DbValue = dbValue });
         }
 
         public object ToDB(object clrValue)
         {
             if (clrValue == null)
                 return DBNull.Value;
-            else
-                return (int)clrValue;
+            return (int)clrValue;
         }
 
         public Type DbType

@@ -20,30 +20,32 @@ namespace Marr.Data.Converters
 {
     public class BooleanYNConverter : IConverter
     {
-        public object FromDB(ColumnMap map, object dbValue)
+        public object FromDB(ConverterContext context)
         {
-            if (dbValue == DBNull.Value)
+            if (context.DbValue == DBNull.Value)
             {
                 return DBNull.Value;
             }
 
-            string val = dbValue.ToString();
+            string val = context.DbValue.ToString();
 
             if (val == "Y")
             {
                 return true;
             }
-            else if (val == "N")
+            if (val == "N")
             {
                 return false;
             }
-            else
-            {
-                throw new ConversionException(
-                    string.Format(
+            throw new ConversionException(
+                string.Format(
                     "The BooleanYNConverter could not convert the value '{0}' to a boolean.",
-                    dbValue));
-            }
+                    context.DbValue));
+        }
+
+        public object FromDB(ColumnMap map, object dbValue)
+        {
+            return FromDB(new ConverterContext {ColumnMap = map, DbValue = dbValue});
         }
 
         public object ToDB(object clrValue)
@@ -54,14 +56,11 @@ namespace Marr.Data.Converters
             {
                 return "Y";
             }
-            else if (val == false)
+            if (val == false)
             {
                 return "N";
             }
-            else
-            {
-                return DBNull.Value;
-            }
+            return DBNull.Value;
         }
 
         public Type DbType

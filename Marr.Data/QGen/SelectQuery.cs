@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using System.Text;
 using Marr.Data.Mapping;
 using Marr.Data.QGen.Dialects;
@@ -63,41 +63,20 @@ namespace Marr.Data.QGen
             // COLUMNS
             foreach (Table join in Tables)
             {
-                // Track added view columns to avoid adding duplicates to the select statement
-                // Duplicates can occur when multiple members in a graph have a property that maps to a shared view column
-                // Ex: Order -> OrderItem: if both the Order and OrderItem classes had a property that mapped to a ShipDate column in the orders view:
-                // This should be allowed, but the ShipDate column should not be selected twice.
-                var viewColumnHash = new HashSet<string>(); 
-
                 for (int i = 0; i < join.Columns.Count; i++)
                 {
                     var c = join.Columns[i];
 
+                    if (sql.Length > startIndex)
+                        sql.Append(",");
+
                     if (join is View)
                     {
-                        string nameOrAltName = NameOrAltName(c.ColumnInfo);
-
-                        if (!viewColumnHash.Contains(nameOrAltName))
-                            viewColumnHash.Add(nameOrAltName);
-                        else
-                            continue;   // Do not add duplicate
-
-                        if (sql.Length > startIndex)
-                            sql.Append(",");
-
-                        string token = string.Concat(join.Alias, ".", nameOrAltName);
+                        string token = string.Concat(join.Alias, ".", NameOrAltName(c.ColumnInfo));
                         sql.Append(Dialect.CreateToken(token));
                     }
                     else
                     {
-                        if (!viewColumnHash.Contains(c.ColumnInfo.Name))
-                            viewColumnHash.Add(c.ColumnInfo.Name);
-                        else
-                            continue;   // Do not add duplicate
-
-                        if (sql.Length > startIndex)
-                            sql.Append(",");
-
                         string token = string.Concat(join.Alias, ".", c.ColumnInfo.Name);
                         sql.Append(Dialect.CreateToken(token));
 
@@ -117,10 +96,7 @@ namespace Marr.Data.QGen
             {
                 return columnInfo.AltName;
             }
-            else
-            {
-                return columnInfo.Name;
-            }
+            return columnInfo.Name;
         }
 
         public void BuildFromClause(StringBuilder sql)
@@ -154,7 +130,16 @@ namespace Marr.Data.QGen
         public void BuildOrderClause(StringBuilder sql)
         {
             sql.Append(OrderBy.ToString());
-        }       
+        }
+       
+        public void BuildGroupBy(StringBuilder sql)
+        {
+            var baseTable = this.Tables.First();
+            var primaryKeyColumn = baseTable.Columns.Single(c => c.ColumnInfo.IsPrimaryKey);
+
+            string token = this.Dialect.CreateToken(string.Concat(baseTable.Alias, ".", primaryKeyColumn.ColumnInfo.Name));
+            sql.AppendFormat(" GROUP BY {0}", token);
+        }
 
         private string TranslateJoin(JoinType join)
         {

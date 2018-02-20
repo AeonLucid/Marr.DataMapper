@@ -15,7 +15,6 @@ License along with this library. If not, see <http://www.gnu.org/licenses/>. */
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Data;
 using System.Reflection;
 using Marr.Data.Mapping;
@@ -66,10 +65,7 @@ namespace Marr.Data
             {
                 return col.TryGetAltName();
             }
-            else
-            {
-                return col.Name;
-            }
+            return col.Name;
         }
 
         /// <summary>
@@ -141,24 +137,10 @@ namespace Marr.Data
             return false;
         }
 
-		public static bool ContainsMember(this List<Relationship> list, MemberInfo member)
-		{
-			var members = list.Select(r => r.Member).ToList();
-			return members.ContainsMember(member);
-		}
-
         public static bool EqualsMember(this MemberInfo member, MemberInfo otherMember)
         {
             return member.Name == otherMember.Name && member.DeclaringType == otherMember.DeclaringType;
         }
-
-		public static bool EqualsMember(this EntityGraph g, MemberInfo otherMember)
-		{
-			return 
-				g.Member != null &&
-				g.Member.Name == otherMember.Name && 
-				g.Parent.EntityType == otherMember.DeclaringType;
-		}
 
         /// <summary>
         /// Determines if a type is not a complex object.
@@ -180,15 +162,5 @@ namespace Marr.Data
             return (theType.IsGenericType && theType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)));
         }
 
-		public static MethodInfo FindPropertyForBackingField(Type entity, MemberInfo backingField)
-		{
-			string backingFieldName = "get" + backingField.Name;
-
-			return entity.GetProperties()
-				.Where(p => p.CanRead)
-				.Select(p => p.GetGetMethod())
-				.Where(pm => string.Compare(pm.Name, backingFieldName, true) == 0)
-				.FirstOrDefault();				
-		}
     }
 }
